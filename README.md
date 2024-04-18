@@ -5,8 +5,8 @@
 <img src="https://img.shields.io/badge/AWS%20-%23FF9900.svg?&style=for-the-badge&logo=amazon-aws&logoColor=white"/> 
 <img src="https://img.shields.io/badge/docker%20-%230db7ed.svg?&style=for-the-badge&logo=docker&logoColor=white"/>
 <img src="https://img.shields.io/badge/AWS-EKS-orange"/>
-<img src="https://img.shields.io/badge/KEDA-2.5.0-blue"/>
-<img src="https://img.shields.io/badge/Karpenter-0.3.0-green"/>
+<img src="https://img.shields.io/badge/amazoneks" />
+
 </p>
 
 ## What is Loft vCluster?
