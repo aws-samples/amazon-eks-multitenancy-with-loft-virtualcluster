@@ -21,7 +21,7 @@ else
 echo "${YELLOW}Cluster does not exists"
 echo "${GREEN} !!Create a eks cluster !!"
 
-eksctl create cluster --name ${CLUSTER_NAME} --region ${AWS_REGION} --version ${K8sversion} 
+eksctl create cluster --name ${CLUSTER_NAME} --region ${AWS_REGION} --version ${KUBERNETES_VERSION} 
 
 fi
 echo "${GREEN}==========================" 
