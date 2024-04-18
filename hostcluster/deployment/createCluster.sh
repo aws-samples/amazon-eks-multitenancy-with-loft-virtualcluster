@@ -28,8 +28,3 @@ echo "${GREEN}=========================="
 echo "${GREEN}Cluster Completed"
 echo "${GREEN}=========================="
 fi
-
-
-# export AWS_REGION="us-east-2"
-# export CLUSTER_NAME="vcluster-demo-3"
-#eksctl delete cluster --name ${CLUSTER_NAME} --region ${AWS_REGION}
