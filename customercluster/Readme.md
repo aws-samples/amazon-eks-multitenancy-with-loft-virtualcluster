@@ -21,7 +21,7 @@ vcluster create customer2-cluster --namespace v-customer2  --connect=false
 
 ```
 ## Connect
-
+vcluster list
 ```
 cd <path>/aws-eks-loft-vcluster/app/product/cluster-config
 ```
@@ -142,3 +142,25 @@ cd <path>/aws-eks-loft-vcluster/vcluster/deployment/policy
     k --kubeconfig ./customer2/kubeconfig.yaml -n app-product exec cust2-product-785c9f5db4-nf27k -- curl http://172.16.127.20 cust2-prod-->cust2-sale -- WORKS
 
 ```
+
+
+kubectl get pods customer1-cluster-0 -n v-customer1 -o jsonpath='{.items[*].spec["initContainers", "containers"][*].name}'
+
+kubectl get pods customer1-cluster-0 -n v-customer1 -o jsonpath='{.spec.containers[*].name}'
+kubectl get pods -n v-customer1 -o jsonpath='{.items[*].spec.containers[*].name}'
+
+
+
+kubectl get pod customer1-cluster-0 -n v-customer1  -o jsonpath='{.spec["initContainers", "containers"][*].name}'
+
+kubectl get pods -n v-customer1 -o jsonpath='{range .items[*]}{"\n"}{.metadata.name}{":\t"}{range .spec.containers[*]}{.image}{", "}{end}{end}' |\
+sort
+
+kubectl get pods customer1-cluster-0 -n v-customer1 -o jsonpath='{.spec.containers[*].name}'
+
+kubectl get pods customer1-cluster-0 -n v-customer1 -o=jsonpath='{range .spec.containers[*]}{.name}{"\n"}{end}'
+
+kubectl describe pod customer1-cluster-0 -n v-customer1 | grep -E '^    [a-z]' | awk '{print $1}'
+
+
+
