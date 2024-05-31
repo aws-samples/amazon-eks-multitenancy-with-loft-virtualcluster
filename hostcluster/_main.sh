@@ -27,6 +27,28 @@ if [[ "$user_input" == *"$Entry"* ]]; then
 
         chmod u+x ./hostcluster/deployment/cni/calico.sh
         ./hostcluster/deployment/cni/calico.sh
+
+        # Cordon the node to mark it unschedulable
+        kubectl cordon ip-192-168-32-19.us-east-2.compute.internal
+
+        # Drain the node to safely evict all pods
+        kubectl drain ip-192-168-32-19.us-east-2.compute.internal --ignore-daemonsets --delete-local-data
+
+        # Uncordon the node to mark it schedulable again
+        kubectl uncordon ip-192-168-32-19.us-east-2.compute.internal
+
+        # Cordon the node to mark it unschedulable
+        kubectl cordon ip-192-168-77-99.us-east-2.compute.internal
+
+        # Drain the node to safely evict all pods
+        kubectl drain ip-192-168-77-99.us-east-2.compute.internal --ignore-daemonsets --delete-local-data
+
+        # Uncordon the node to mark it schedulable again
+        kubectl uncordon ip-192-168-77-99.us-east-2.compute.internal      
+
+
+
+
         else
         echo "${RED}Cluster does not exists, ***skipping CSI CNI***"
         echo "${RED}Exit Deployment"

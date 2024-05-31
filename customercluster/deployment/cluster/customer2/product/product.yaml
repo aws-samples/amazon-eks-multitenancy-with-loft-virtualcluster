@@ -16,6 +16,7 @@ spec:
       containers:
       - name: product
         image: khanasif1/product_api:rc0.2
+        imagePullPolicy: Always
         resources:
           requests:
             cpu: 200m

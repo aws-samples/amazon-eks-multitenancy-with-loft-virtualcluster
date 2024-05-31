@@ -5,7 +5,7 @@ export AWS_REGION="us-east-2"
 export ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
 
 #Cluster Variables
-export CLUSTER_NAME="vcluster-demo-3"
+export CLUSTER_NAME="vcluster-demo-5"
 export KUBERNETES_VERSION="1.29"
 
 

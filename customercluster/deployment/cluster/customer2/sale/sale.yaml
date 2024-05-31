@@ -16,6 +16,7 @@ spec:
       containers:
       - name: sale
         image: khanasif1/sale_api:rc0.2
+        imagePullPolicy: Always
         resources:
           requests:
             cpu: 200m

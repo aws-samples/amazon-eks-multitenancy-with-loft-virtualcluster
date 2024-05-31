@@ -15,9 +15,12 @@ vcluster --version
 
 ```
 cd <path>/aws-eks-loft-vcluster/vcluster/deployment  
+kubectl create namespace  v-customer1
+kubectl create namespace  v-customer2
 
 vcluster create customer1-cluster --namespace v-customer1 --connect=false
 vcluster create customer2-cluster --namespace v-customer2  --connect=false
+
 
 ```
 ## Connect
@@ -50,18 +53,22 @@ cd <path>/aws-eks-loft-vcluster/app/product/cluster-config
 -->
 ```
 cd <path>/vcluster/deployment/cluster/customer1
+
 ```
 ## Deploy app
 
-k --kubeconfig ./kubeconfig.yaml create ns app-product
+kubectl --kubeconfig ./kubeconfig.yaml create ns app-product
 kubectl  --kubeconfig ./kubeconfig.yaml apply -f ./product/product.yaml
+kubectl --kubeconfig ./kubeconfig.yaml -n app-product get pod  
+kubectl --kubeconfig ./kubeconfig.yaml -n app-product exec cust2-product-7c8999c64-wfm6s  -- curl http://localhost
 
-
-k --kubeconfig ./kubeconfig.yaml create ns app-sale
+kubectl --kubeconfig ./kubeconfig.yaml create ns app-sale
 kubectl  --kubeconfig ./kubeconfig.yaml apply -f ./sale/sale.yaml
-k --kubeconfig ./kubeconfig.yaml -n app-sale exec cust1-sale-7d45967965-zbx7b -- curl http://172.16.127.20
+kubectl --kubeconfig ./kubeconfig.yaml -n app-sale get pod  
+kubectl --kubeconfig ./kubeconfig.yaml -n app-sale exec cust2-sale-64485fcdb6-wkmlt -- curl http://localhost
 
-
+<!-- kubectl  --kubeconfig ./kubeconfig.yaml delete -f ./product/product.yaml   
+kubectl  --kubeconfig ./kubeconfig.yaml delete -f ./sale/sale.yaml   -->
 <!-- - ssh on container
     kubectl exec --stdin --tty {podname} -- /bin/bash
 
@@ -94,8 +101,6 @@ k --kubeconfig ./kubeconfig.yaml -n app-sale exec cust1-sale-7d45967965-zbx7b --
 
     Use --isolate to create an isolated environment for the vCluster workloads
 
-    vcluster create my-vcluster --isolate
-    vcluster delete my-vcluster -n vcluster-my-vcluster   --delete-namespace
 
 ##  List vCluster
 vcluster list
@@ -105,7 +110,6 @@ vcluster list
 ```
 vcluster delete customer1-cluster -n v-customer1   --delete-namespace
 vcluster delete customer2-cluster -n v-customer2   --delete-namespace
-
 
 k config get-contexts
 k config set-context akaasif-Isengard@vcluster-demo.ap-southeast-2.eksctl.io 
@@ -134,12 +138,19 @@ cd <path>/aws-eks-loft-vcluster/vcluster/deployment/policy
 ```
 
 - Test Policy
+kubectl --kubeconfig ./kubeconfig.yaml -n app-product get pod  -o wide
+kubectl --kubeconfig ./kubeconfig.yaml -n app-sale get pod  -o wide
+
+cust1-product-7d9dbf94df-ftbjx 192.168.47.46
+cust1-sale-66bf9d5775-8z7kx    192.168.12.229
+cust2-product-7c8999c64-9bdzl  192.168.41.100
+cust2-sale-64485fcdb6-wkmlt    192.168.8.8 
 
 ```
-    k --kubeconfig ./customer1/kubeconfig.yaml -n app-product exec cust1-product-7899b7cd9f-7m8fs -- curl http://172.16.127.18 cust1-prod-->cust1-sale -- WORKS
-    k --kubeconfig ./customer1/kubeconfig.yaml -n app-product exec cust1-product-7899b7cd9f-7m8fs -- curl http://172.16.106.17 cust1-prod-->cust2-prod -- FAILS 
-    k --kubeconfig ./customer2/kubeconfig.yaml -n app-product exec cust2-product-785c9f5db4-nf27k -- curl http://172.16.106.15 cust2-prod-->cust1-prod -- FAILS
-    k --kubeconfig ./customer2/kubeconfig.yaml -n app-product exec cust2-product-785c9f5db4-nf27k -- curl http://172.16.127.20 cust2-prod-->cust2-sale -- WORKS
+    kubectl --kubeconfig ./customer1/kubeconfig.yaml -n app-product exec cust1-product-7d9dbf94df-ftbjx -- curl http://192.168.12.229   #cust1-prod-->cust1-sale -- WORKS
+    kubectl --kubeconfig ./customer1/kubeconfig.yaml -n app-product exec cust1-product-7d9dbf94df-jmv58    -- curl http://192.168.11.91   #cust1-prod-->cust2-prod -- FAILS 
+    kubectl --kubeconfig ./customer2/kubeconfig.yaml -n app-sale exec cust2-sale-64485fcdb6-wkmlt -- curl http://192.168.12.229         #cust2-sale-->cust1-sale -- FAILS
+    kubectl --kubeconfig ./customer2/kubeconfig.yaml -n app-product exec cust2-product-7c8999c64-9bdzl -- curl http://192.168.8.8       #cust2-prod-->cust2-sale -- WORKS
 
 ```
 

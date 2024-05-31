@@ -32,7 +32,7 @@ echo "${GREEN}CSI policy attached to worker node role"
 
 echo "${GREEN}Deploy EBS CSI Driver"
 kubectl apply -k "github.com/kubernetes-sigs/aws-ebs-csi-driver/deploy/kubernetes/overlays/stable/?ref=master"
-
+# kubectl delete -k "github.com/kubernetes-sigs/aws-ebs-csi-driver/deploy/kubernetes/overlays/stable/?ref=master"
 echo "${GREEN}Verify ebs-csi pods running"
 kubectl get pods -n kube-system
 

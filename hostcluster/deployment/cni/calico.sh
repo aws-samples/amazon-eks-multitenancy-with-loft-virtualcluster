@@ -14,7 +14,7 @@ echo "${GREEN}Installing Calico policy manager"
 echo "${GREEN}=========================="
 
 kubectl create -f ./hostcluster/deployment/cni/tigera-operator.yaml
-
+# kubectl delete -f ./hostcluster/deployment/cni/tigera-operator.yaml
 kubectl create -f - <<EOF
   kind: Installation
   apiVersion: operator.tigera.io/v1
