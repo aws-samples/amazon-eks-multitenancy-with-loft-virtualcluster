@@ -65,15 +65,11 @@ echo "${RED}Policy deleted"
 
     echo "Service account and IAM role deleted successfully."
 
-
-
     # Delete the EKS addon
     aws eks delete-addon --cluster-name $CLUSTER_NAME --addon-name $addon_name
 
-    # Detach the policy from the IAM role
-    aws iam detach-role-policy --role-name $role_name --policy-arn $policy_arn
-
-    # Delete the IAM role
-    aws iam delete-role --role-name $role_name
-
     echo "Addon, IAM role, and policy deleted successfully."
+
+echo "${GREEN}=========================="
+echo "${GREEN}End Cleanup"
+echo "${GREEN}=========================="

@@ -21,7 +21,6 @@ kubectl create namespace  v-customer2
 vcluster create customer1-cluster --namespace v-customer1 --connect=false
 vcluster create customer2-cluster --namespace v-customer2  --connect=false
 
-
 ```
 ## Connect
 vcluster list
@@ -37,6 +36,7 @@ cd <path>/aws-eks-loft-vcluster/app/product/cluster-config
 
 
     kubectl  --kubeconfig ./kubeconfig.yaml get namespaces
+    kubectl replace --raw "/api/v1/namespaces/v-customer2/finalize" -f ./tmp.json
 
 ```
 
@@ -117,13 +117,28 @@ k config set-context akaasif-Isengard@vcluster-demo.ap-southeast-2.eksctl.io
 kubectl config use-context akaasif-Isengard@vcluster-demo.ap-southeast-2.eksctl.io
 kubectl config use-context akaasif-Isengard@vcluster-demo-2.us-east-2.eksctl.io
 ```
+# Delete Namespace when stuck
+
+```    
+     kubectl  --kubeconfig ./kubeconfig.yaml get namespaces
+     kubectl get namespace v-customer1 -o json > tmp1.json
+     kubectl get namespace v-customer2 -o json > tmp2.json
+
+     kubectl replace --raw "/api/v1/namespaces/v-customer1/finalize" -f ./tmp1.json
+     kubectl replace --raw "/api/v1/namespaces/v-customer2/finalize" -f ./tmp2.json
+```
+
 <p align="center">
   <img  src="https://github.com/khanasif1/aws-eks-loft-vcluster/blob/main/architetcure/RefArchitecture.svg">
 </p>
 
 ##  Network policy
 
-
+https://docs.aws.amazon.com/eks/latest/userguide/managing-vpc-cni.html
+https://docs.aws.amazon.com/eks/latest/userguide/cni-network-policy.html
+https://docs.aws.amazon.com/eks/latest/userguide/cni-iam-role.html#cni-iam-role-create-role
+https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html
+https://docs.aws.amazon.com/eks/latest/userguide/managing-add-ons.html#creating-an-add-on
 ```
 cd <path>/aws-eks-loft-vcluster/vcluster/deployment/policy
 ```
@@ -141,16 +156,17 @@ cd <path>/aws-eks-loft-vcluster/vcluster/deployment/policy
 kubectl --kubeconfig ./kubeconfig.yaml -n app-product get pod  -o wide
 kubectl --kubeconfig ./kubeconfig.yaml -n app-sale get pod  -o wide
 
-cust1-product-7d9dbf94df-ftbjx 192.168.47.46
-cust1-sale-66bf9d5775-8z7kx    192.168.12.229
-cust2-product-7c8999c64-9bdzl  192.168.41.100
-cust2-sale-64485fcdb6-wkmlt    192.168.8.8 
+cust1-product-7d9dbf94df-6kt2c   192.168.32.137
+cust2-product-7c8999c64-jrcjh    192.168.75.6
+kubectl --kubeconfig ./kubeconfig.yaml -n app-product exec cust1-product-7d9dbf94df-6kt2c -- curl http://192.168.32.137
+kubectl --kubeconfig ./kubeconfig.yaml -n app-product exec cust2-product-7c8999c64-jrcjh  -- curl http://192.168.75.6
+
 
 ```
-    kubectl --kubeconfig ./customer1/kubeconfig.yaml -n app-product exec cust1-product-7d9dbf94df-ftbjx -- curl http://192.168.12.229   #cust1-prod-->cust1-sale -- WORKS
-    kubectl --kubeconfig ./customer1/kubeconfig.yaml -n app-product exec cust1-product-7d9dbf94df-jmv58    -- curl http://192.168.11.91   #cust1-prod-->cust2-prod -- FAILS 
+    kubectl --kubeconfig ./customer1/kubeconfig.yaml -n app-product exec cust1-product-7d9dbf94df-jmv58 -- curl http://192.168.12.229   #cust1-prod-->cust1-sale -- WORKS
+    kubectl --kubeconfig ./customer1/kubeconfig.yaml -n app-product exec cust1-product-7d9dbf94df-6kt2c    -- curl http://192.168.75.6  #cust1-prod-->cust2-prod -- FAILS 
     kubectl --kubeconfig ./customer2/kubeconfig.yaml -n app-sale exec cust2-sale-64485fcdb6-wkmlt -- curl http://192.168.12.229         #cust2-sale-->cust1-sale -- FAILS
-    kubectl --kubeconfig ./customer2/kubeconfig.yaml -n app-product exec cust2-product-7c8999c64-9bdzl -- curl http://192.168.8.8       #cust2-prod-->cust2-sale -- WORKS
+    kubectl --kubeconfig ./customer2/kubeconfig.yaml -n app-product exec cust2-product-7c8999c64-fx9n4 -- curl http://192.168.0.191       #cust2-prod-->cust2-sale -- WORKS
 
 ```
 
