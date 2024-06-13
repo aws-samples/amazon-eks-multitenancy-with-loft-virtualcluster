@@ -14,22 +14,27 @@ echo "${RED}Update values & Run environmentVariables.sh file"
 exit 1;
 else 
 
-oidc_id=$(aws eks describe-cluster --name "$cluster_name" --query "cluster.identity.oidc.issuer" --output text | cut -d '/' -f 5)
-echo $oidc_id
+oidc_id=$(aws eks describe-cluster --name "$CLUSTER_NAME" --region "$AWS_REGION" --query "cluster.identity.oidc.issuer" --output text | cut -d '/' -f 5)
+echo "oidc_id:${oidc_id}"
+openId_connect_providers=$(aws iam list-open-id-connect-providers --output text | grep "$oidc_id" | cut -d "/" -f4)
+echo "openId_connect_providers:${openId_connect_providers}"
 
-if [ "$oidc_id" = "None" ]; then
+
+if [[ "$openId_connect_providers" == "" ]]; then
   echo "OIDC ID is missing, install now"
   eksctl utils associate-iam-oidc-provider --cluster "$CLUSTER_NAME" --approve
   oidc_id=$(aws eks describe-cluster --name "$CLUSTER_NAME" --query "cluster.identity.oidc.issuer" --output text | cut -d '/' -f 5)
   echo $oidc_id
-  openId_connect=$(aws iam list-open-id-connect-providers | grep "$oidc_id" | cut -d "/" -f4)
+  openId_connect_providers=$(aws iam list-open-id-connect-providers | grep "$oidc_id" | cut -d "/" -f4)
+  echo "openId_connect_providers:${openId_connect_providers}"
 else
-  echo "OIDC ID: $oidc_id"
+  echo "OIDC ID providers: $openId_connect_providers"
 fi
 
 
 #Create Policy
 OIDC_PROVIDER=$(aws eks describe-cluster --name ${CLUSTER_NAME} --region ${AWS_REGION} --query "cluster.identity.oidc.issuer" --output text | sed -e "s/^https:\/\///")
+echo "OIDC_PROVIDER: $OIDC_PROVIDER"
 policy=$(cat <<EOF
 {
     "Version": "2012-10-17",
@@ -37,7 +42,7 @@ policy=$(cat <<EOF
         {
             "Effect": "Allow",
             "Principal": {
-                "Federated": "arn:aws:iam::$ACCOUNT_ID:oidc-provider/oidc.eks.$AWS_REGION.amazonaws.com/id/$oidc_id"
+                "Federated": "arn:aws:iam::$ACCOUNT_ID:oidc-provider/oidc.eks.$AWS_REGION.amazonaws.com/id/${oidc_id}"
             },
             "Action": "sts:AssumeRoleWithWebIdentity",
             "Condition": {
@@ -51,48 +56,52 @@ policy=$(cat <<EOF
 }
 EOF
 )
+echo "Policy : "$policy
 #Create the role
-aws iam create-role \
-  --role-name AmazonEKSVPCCNIRole \
-  --assume-role-policy-document $policy
+create_role=$(aws iam create-role  --role-name "$VPC_CNI_ROLE" --assume-role-policy-document "$policy")
+echo "Create role: "$create_role
+
+check_role_exists() {
+  aws iam get-role --role-name "$VPC_CNI_ROLE" >/dev/null 2>&1
+}
+
+echo "Waiting for role to be created..."
+while ! check_role_exists; do
+  sleep 5
+  echo "Still waiting..."
+done
 
 #Attach the required IAM policy
 aws iam attach-role-policy \
   --policy-arn arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy \
-  --role-name AmazonEKSVPCCNIRole
+  --role-name $VPC_CNI_ROLE
+ echo "Policy attached to role"
 
-#Run the following command to annotate the K8s aws-node service account with the ARN of the IAM role that you created previously.
-# kubectl annotate serviceaccount \
-#     -n kube-system aws-node \
-#     eks.amazonaws.com/role-arn=arn:aws:iam::$ACCOUNT_ID:role/AmazonEKSVPCCNIRole
+describe_addon() {
+  aws eks describe-addon --cluster-name "$CLUSTER_NAME" --addon-name vpc-cni 2>&1
+}
+
+# Run the command and capture the output and exit status
+output=$(describe_addon)
+exit_status=$?
 
 
-aws eks describe-cluster --name "$CLUSTER_NAME" | grep ipFamily
-
-
-# eksctl create iamserviceaccount \
-#     --name aws-node \
-#     --namespace kube-system \
-#     --cluster "$CLUSTER_NAME" \
-#     --role-name AmazonEKSVPCCNIRole \
-#     --attach-policy-arn arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy \
-#     --override-existing-serviceaccounts \
-#     --approve
-
-addon_name="vpc-cni"
-
-# Attempt to describe the addon and capture the output
-output=$(aws eks describe-addon --cluster-name "$CLUSTER_NAME" --addon-name "$addon_name" --query addon.addonVersion --output text 2>&1)
-
-if echo "$output" | grep -q "ResourceNotFoundException"; then
-  echo "Addon $addon_name not found in cluster $CLUSTER_NAME."
-  aws eks create-addon --cluster-name "$CLUSTER_NAME" --addon-name vpc-cni --addon-version v1.18.1-eksbuild.3 \
-    --service-account-role-arn arn:aws:iam::"$ACCOUNT_ID":role/AmazonEKSVPCCNIRole \
-    --resolve-conflicts PRESERVE --configuration-values '{"enableNetworkPolicy": "true"}'
+if [ $exit_status -ne 0 ]; then
+  # Check if the error is a ResourceNotFoundException
+  if echo "$output" | grep -q "ResourceNotFoundException"; then
+    echo "Addon not found: vpc-cni"
+    echo "Start creating Addon : vpc-cni"
+     create_addon=$(aws eks create-addon --cluster-name "$CLUSTER_NAME" --addon-name vpc-cni --addon-version "$VPC_CNI_VERSION" \
+    --service-account-role-arn arn:aws:iam::"$ACCOUNT_ID":role/"$VPC_CNI_ROLE" \
+    --resolve-conflicts PRESERVE --configuration-values '{"enableNetworkPolicy": "true"}')
+  else
+    echo "An error occurred: $output"
+  fi
 else
-  echo "Addon version: $output"
+  echo "Addon details:"
+  echo "$output" | jq
 fi
-#Confirm that the aws-node pods are running on your cluster.
+
 
 kubectl get pods -n kube-system | grep 'aws-node\|amazon'
 

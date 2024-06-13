@@ -148,8 +148,11 @@ cd <path>/aws-eks-loft-vcluster/vcluster/deployment/policy
 - Apply Policy
 
 ```
-    kubectl  apply -f ../policy/customer1-deny-all-external.yaml  
-    kubectl  apply -f ../policy/customer2-deny-all-external.yaml  
+    kubectl  apply -f ./customercluster/deployment/policy/customer1-deny-all-external.yaml  
+    kubectl  apply -f ./customercluster/deployment/policy/customer2-deny-all-external.yaml  
+
+    kubectl  delete -f ./customercluster/deployment/policy/customer1-deny-all-external.yaml  
+    kubectl  delete -f ./customercluster/deployment/policy/customer2-deny-all-external.yaml  
 ```
 
 - Test Policy
@@ -158,13 +161,13 @@ kubectl --kubeconfig ./kubeconfig.yaml -n app-sale get pod  -o wide
 
 cust1-product-7d9dbf94df-6kt2c   192.168.32.137
 cust2-product-7c8999c64-jrcjh    192.168.75.6
-kubectl --kubeconfig ./kubeconfig.yaml -n app-product exec cust1-product-7d9dbf94df-6kt2c -- curl http://192.168.32.137
-kubectl --kubeconfig ./kubeconfig.yaml -n app-product exec cust2-product-7c8999c64-jrcjh  -- curl http://192.168.75.6
+kubectl --kubeconfig ./kubeconfig.yaml -n app-product exec cust1-product-7d9dbf94df-n85bl -- curl http://192.168.71.213
+kubectl --kubeconfig ./kubeconfig.yaml -n app-product exec cust2-product-7c8999c64-lq82k  -- curl http://192.168.47.45
 
 
 ```
     kubectl --kubeconfig ./customer1/kubeconfig.yaml -n app-product exec cust1-product-7d9dbf94df-jmv58 -- curl http://192.168.12.229   #cust1-prod-->cust1-sale -- WORKS
-    kubectl --kubeconfig ./customer1/kubeconfig.yaml -n app-product exec cust1-product-7d9dbf94df-6kt2c    -- curl http://192.168.75.6  #cust1-prod-->cust2-prod -- FAILS 
+    kubectl --kubeconfig ./customer1/kubeconfig.yaml -n app-product exec cust1-product-7d9dbf94df-n85bl    -- curl http://192.168.47.45  #cust1-prod-->cust2-prod -- FAILS 
     kubectl --kubeconfig ./customer2/kubeconfig.yaml -n app-sale exec cust2-sale-64485fcdb6-wkmlt -- curl http://192.168.12.229         #cust2-sale-->cust1-sale -- FAILS
     kubectl --kubeconfig ./customer2/kubeconfig.yaml -n app-product exec cust2-product-7c8999c64-fx9n4 -- curl http://192.168.0.191       #cust2-prod-->cust2-sale -- WORKS
 

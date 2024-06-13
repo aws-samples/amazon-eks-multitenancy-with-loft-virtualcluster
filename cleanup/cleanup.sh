@@ -34,10 +34,15 @@ echo "${RED}Policy deleted"
 
     # List OIDC providers and find the correct one
     oidc_provider_url=$(aws eks describe-cluster --name "$CLUSTER_NAME" --region "$AWS_REGION" --query "cluster.identity.oidc.issuer" --output text)
-
+    echo $oidc_provider_url
     # Extract the OIDC provider ARN
-    oidc_provider_arn=$(aws iam list-open-id-connect-providers --query 'OpenIDConnectProviderList[*].Arn' --output text | grep "$oidc_provider_url")
+    oidc_provider_arn=$(aws iam list-open-id-connect-providers --query 'OpenIDConnectProviderList[*].Arn' --output json | grep ${oidc_provider_url#https://})
+    echo $oidc_provider_arn
 
+    oidc_provider_arn=${oidc_provider_arn//\",/}
+    oidc_provider_arn=${oidc_provider_arn//\"/}
+    oidc_provider_arn=$(echo "$oidc_provider_arn" | tr -cd '[:alnum:]_./:=+-@')
+    echo $oidc_provider_arn
     # Remove the IAM OIDC provider
     if [ -n "$oidc_provider_arn" ]; then
     aws iam delete-open-id-connect-provider --open-id-connect-provider-arn "$oidc_provider_arn"
@@ -60,10 +65,10 @@ echo "${RED}Policy deleted"
     # Delete the IAM role
     aws iam delete-role --role-name $role_name
 
-    # Delete the Kubernetes service account
-    kubectl delete serviceaccount $service_account_name -n $namespace
+    # # Delete the Kubernetes service account
+    # delete_svc_acc=$(kubectl delete serviceaccount $service_account_name -n $namespace)
 
-    echo "Service account and IAM role deleted successfully."
+    # echo "Service account and IAM role deleted successfully."
 
     # Delete the EKS addon
     aws eks delete-addon --cluster-name $CLUSTER_NAME --addon-name $addon_name
