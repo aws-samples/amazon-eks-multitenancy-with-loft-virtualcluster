@@ -16,3 +16,36 @@ vCluster is a Kubernetes-native solution that allows you to create fully functio
 <p align="center">
   <img  src="https://github.com/khanasif1/aws-eks-loft-vcluster/blob/main/architetcure/HL_RefArchitecture.svg">
 </p>
+
+*** 
+# Deploy Solution
+
+## Deploy cluster with CSI, CNI components
+
+* Navigate to path
+
+```
+cd <path>/aws-eks-loft-vcluster/hostcluster/
+
+```
+* Edit environmentVariables.sh with relevent values
+
+```
+export AWS_REGION="us-east-2"  # edit as needed
+export ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
+
+#Cluster Variables
+export CLUSTER_NAME="vcluster-demo-5" # edit as needed
+export KUBERNETES_VERSION="1.28" # edit as needed
+
+export VPC_CNI_ROLE="AmazonEKSVPCCNIRole" # edit as needed
+export VPC_CNI_VERSION="v1.18.2-eksbuild.1" # edit as needed
+
+```
+
+* Run scritp _main.sh
+
+```
+sh ./hostcluster/_main.sh 
+
+```
