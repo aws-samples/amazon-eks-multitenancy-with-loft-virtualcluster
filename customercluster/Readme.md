@@ -21,6 +21,10 @@ kubectl create namespace  v-customer2
 vcluster create customer1-cluster --namespace v-customer1 --connect=false
 vcluster create customer2-cluster --namespace v-customer2  --connect=false
 
+kubectl create namespace  v-customer3
+vcluster create customer3-cluster --namespace v-customer3 --connect=false
+vcluster connect customer3-cluster -n v-customer3 --update-current=false 
+vcluster delete customer3-cluster -n v-customer3   --delete-namespace
 ```
 ## Connect
 vcluster list
@@ -60,7 +64,7 @@ cd <path>/vcluster/deployment/cluster/customer1
 kubectl --kubeconfig ./kubeconfig.yaml create ns app-product
 kubectl  --kubeconfig ./kubeconfig.yaml apply -f ./product/product.yaml
 kubectl --kubeconfig ./kubeconfig.yaml -n app-product get pod  
-kubectl --kubeconfig ./kubeconfig.yaml -n app-product exec cust2-product-7c8999c64-wfm6s  -- curl http://localhost
+kubectl --kubeconfig ./kubeconfig.yaml -n app-product exec cust1-product-7d9dbf94df-jrc9g  -- curl http://localhost
 
 kubectl --kubeconfig ./kubeconfig.yaml create ns app-sale
 kubectl  --kubeconfig ./kubeconfig.yaml apply -f ./sale/sale.yaml
@@ -105,28 +109,6 @@ kubectl  --kubeconfig ./kubeconfig.yaml delete -f ./sale/sale.yaml   -->
 ##  List vCluster
 vcluster list
 
-##  vCluster Delete
-
-```
-vcluster delete customer1-cluster -n v-customer1   --delete-namespace
-vcluster delete customer2-cluster -n v-customer2   --delete-namespace
-
-k config get-contexts
-k config set-context akaasif-Isengard@vcluster-demo.ap-southeast-2.eksctl.io 
-
-kubectl config use-context akaasif-Isengard@vcluster-demo.ap-southeast-2.eksctl.io
-kubectl config use-context akaasif-Isengard@vcluster-demo-2.us-east-2.eksctl.io
-```
-# Delete Namespace when stuck
-
-```    
-     kubectl  --kubeconfig ./kubeconfig.yaml get namespaces
-     kubectl get namespace v-customer1 -o json > tmp1.json
-     kubectl get namespace v-customer2 -o json > tmp2.json
-
-     kubectl replace --raw "/api/v1/namespaces/v-customer1/finalize" -f ./tmp1.json
-     kubectl replace --raw "/api/v1/namespaces/v-customer2/finalize" -f ./tmp2.json
-```
 
 <p align="center">
   <img  src="https://github.com/khanasif1/aws-eks-loft-vcluster/blob/main/architetcure/RefArchitecture.svg">
@@ -151,23 +133,26 @@ cd <path>/aws-eks-loft-vcluster/vcluster/deployment/policy
     kubectl  apply -f ./customercluster/deployment/policy/customer1-deny-all-external.yaml  
     kubectl  apply -f ./customercluster/deployment/policy/customer2-deny-all-external.yaml  
 
+
     kubectl  delete -f ./customercluster/deployment/policy/customer1-deny-all-external.yaml  
     kubectl  delete -f ./customercluster/deployment/policy/customer2-deny-all-external.yaml  
 ```
 
 - Test Policy
-kubectl --kubeconfig ./kubeconfig.yaml -n app-product get pod  -o wide
-kubectl --kubeconfig ./kubeconfig.yaml -n app-sale get pod  -o wide
+cd <path>/vcluster/deployment/cluster
+<!-- Get Pod Name and Ip -->
+kubectl --kubeconfig ./kubeconfig.yaml -n app-product get pod  -o wide  <!-- customer1 -->
+kubectl --kubeconfig ./kubeconfig.yaml -n app-sale get pod  -o wide <!-- customer1 -->
+kubectl --kubeconfig ./kubeconfig.yaml -n app-product get pod  -o wide <!-- customer2 -->
+kubectl --kubeconfig ./kubeconfig.yaml -n app-sale get pod  -o wide <!-- customer1 -->
 
-cust1-product-7d9dbf94df-6kt2c   192.168.32.137
-cust2-product-7c8999c64-jrcjh    192.168.75.6
-kubectl --kubeconfig ./kubeconfig.yaml -n app-product exec cust1-product-7d9dbf94df-n85bl -- curl http://192.168.71.213
-kubectl --kubeconfig ./kubeconfig.yaml -n app-product exec cust2-product-7c8999c64-lq82k  -- curl http://192.168.47.45
+kubectl --kubeconfig ./kubeconfig.yaml -n app-product exec cust1-product-7d9dbf94df-7hgv9 -- curl http://192.168.18.144
+kubectl --kubeconfig ./kubeconfig.yaml -n app-product exec cust2-product-7c8999c64-jj7k6  -- curl http://192.168.75.114
 
 
 ```
     kubectl --kubeconfig ./customer1/kubeconfig.yaml -n app-product exec cust1-product-7d9dbf94df-jmv58 -- curl http://192.168.12.229   #cust1-prod-->cust1-sale -- WORKS
-    kubectl --kubeconfig ./customer1/kubeconfig.yaml -n app-product exec cust1-product-7d9dbf94df-n85bl    -- curl http://192.168.47.45  #cust1-prod-->cust2-prod -- FAILS 
+    kubectl --kubeconfig ./customer1/kubeconfig.yaml -n app-product exec cust1-product-7d9dbf94df-5bjl4    -- curl http://192.168.12.206 #cust1-prod-->cust2-prod -- FAILS 
     kubectl --kubeconfig ./customer2/kubeconfig.yaml -n app-sale exec cust2-sale-64485fcdb6-wkmlt -- curl http://192.168.12.229         #cust2-sale-->cust1-sale -- FAILS
     kubectl --kubeconfig ./customer2/kubeconfig.yaml -n app-product exec cust2-product-7c8999c64-fx9n4 -- curl http://192.168.0.191       #cust2-prod-->cust2-sale -- WORKS
 
@@ -193,4 +178,25 @@ kubectl get pods customer1-cluster-0 -n v-customer1 -o=jsonpath='{range .spec.co
 kubectl describe pod customer1-cluster-0 -n v-customer1 | grep -E '^    [a-z]' | awk '{print $1}'
 
 
+##  vCluster Delete
 
+```
+vcluster delete customer1-cluster -n v-customer1   --delete-namespace
+vcluster delete customer2-cluster -n v-customer2   --delete-namespace
+
+k config get-contexts
+k config set-context akaasif-Isengard@vcluster-demo.ap-southeast-2.eksctl.io 
+
+kubectl config use-context akaasif-Isengard@vcluster-demo.ap-southeast-2.eksctl.io
+kubectl config use-context akaasif-Isengard@vcluster-demo-2.us-east-2.eksctl.io
+```
+# Delete Namespace when stuck
+
+```    
+     kubectl  --kubeconfig ./kubeconfig.yaml get namespaces
+     kubectl get namespace v-customer1 -o json > tmp1.json
+     kubectl get namespace v-customer2 -o json > tmp2.json
+
+     kubectl replace --raw "/api/v1/namespaces/v-customer1/finalize" -f ./tmp1.json
+     kubectl replace --raw "/api/v1/namespaces/v-customer2/finalize" -f ./tmp2.json
+```
