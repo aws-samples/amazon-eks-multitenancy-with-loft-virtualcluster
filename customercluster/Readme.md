@@ -61,6 +61,8 @@ cd <path>/vcluster/deployment/cluster/customer1
 ```
 ## Deploy app
 
+```
+
 kubectl --kubeconfig ./kubeconfig.yaml create ns app-product
 kubectl  --kubeconfig ./kubeconfig.yaml apply -f ./product/product.yaml
 kubectl --kubeconfig ./kubeconfig.yaml -n app-product get pod  
@@ -70,6 +72,8 @@ kubectl --kubeconfig ./kubeconfig.yaml create ns app-sale
 kubectl  --kubeconfig ./kubeconfig.yaml apply -f ./sale/sale.yaml
 kubectl --kubeconfig ./kubeconfig.yaml -n app-sale get pod  
 kubectl --kubeconfig ./kubeconfig.yaml -n app-sale exec cust2-sale-64485fcdb6-wkmlt -- curl http://localhost
+
+```
 
 <!-- kubectl  --kubeconfig ./kubeconfig.yaml delete -f ./product/product.yaml   
 kubectl  --kubeconfig ./kubeconfig.yaml delete -f ./sale/sale.yaml   -->
