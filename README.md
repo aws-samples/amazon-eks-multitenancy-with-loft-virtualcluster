@@ -49,3 +49,12 @@ export VPC_CNI_VERSION="v1.18.2-eksbuild.1" # edit as needed
 sh ./hostcluster/_main.sh 
 
 ```
+
+# Deploy vCluster, Application & test network isolation
+
+Follow the guide to deploy : [link](https://github.com/aws-samples/amazon-eks-multitenancy-with-loft-virtualcluster/tree/main/customercluster)
+- vCluster
+- deploy api application
+- deploy network isolation between vClsuter
+- Test network isolation
+
