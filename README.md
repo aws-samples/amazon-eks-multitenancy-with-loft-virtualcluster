@@ -12,6 +12,7 @@
 ## What is Loft vCluster?
 <img src="https://github.com/aws-samples/amazon-eks-multitenancy-with-loft-virtualcluster/blob/main/architetcure/eksvcluster.jpg" />
 vCluster is a Kubernetes-native solution that allows you to create fully functional virtual Kubernetes clusters inside regular Kubernetes namespaces. Each virtual cluster has its own API server, control plane, and data store, providing strong isolation and multi-tenancy on top of a shared underlying Kubernetes cluster.
+
 *** 
 
 ## Reference Architecture
