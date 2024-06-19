@@ -14,22 +14,18 @@ vcluster --version
 <!-- vcluster create dev-cluster --namespace v-dev --connect=false   -f vclusterconfig.yaml  --connect=false   -->
 
 ```
-cd <path>/aws-eks-loft-vcluster/vcluster/deployment  
+cd <path>/amazon-eks-multitenancy-with-loft-virtualcluster/vcluster/deployment  
 kubectl create namespace  v-customer1
 kubectl create namespace  v-customer2
 
 vcluster create customer1-cluster --namespace v-customer1 --connect=false
-vcluster create customer2-cluster --namespace v-customer2  --connect=false
+vcluster create customer2-cluster --namespace v-customer2 --distro k0s --connect=false
 
-kubectl create namespace  v-customer3
-vcluster create customer3-cluster --namespace v-customer3 --connect=false
-vcluster connect customer3-cluster -n v-customer3 --update-current=false 
-vcluster delete customer3-cluster -n v-customer3   --delete-namespace
 ```
 ## Connect
 vcluster list
 ```
-cd <path>/aws-eks-loft-vcluster/app/product/cluster-config
+cd <path>/amazon-eks-multitenancy-with-loft-virtualcluster/customercluster/deployment/cluster/{customer1 OR 2}
 ```
 <!-- below command will connect to product-cluster and add ./kubeconfig.yaml to folder -->
 ```
@@ -44,17 +40,6 @@ cd <path>/aws-eks-loft-vcluster/app/product/cluster-config
 
 ```
 
-<!-- 
-    vcluster create product-cluster --namespace v-product --upgrade  --connect=false  --isolate=true
-
-    vcluster pause product-cluster -n v-product
-    vcluster resume product-cluster -n v-product
-
-    vcluster create sale-cluster --namespace v-sale --upgrade  --connect=false  --isolate=true
-
-    vcluster pause sale-cluster -n v-sale
-    vcluster resume sale-cluster -n v-sale 
--->
 ```
 cd <path>/vcluster/deployment/cluster/customer1
 
@@ -66,34 +51,21 @@ cd <path>/vcluster/deployment/cluster/customer1
 kubectl --kubeconfig ./kubeconfig.yaml create ns app-product
 kubectl  --kubeconfig ./kubeconfig.yaml apply -f ./product/product.yaml
 kubectl --kubeconfig ./kubeconfig.yaml -n app-product get pod  
-kubectl --kubeconfig ./kubeconfig.yaml -n app-product exec cust1-product-7d9dbf94df-jrc9g  -- curl http://localhost
+kubectl --kubeconfig ./kubeconfig.yaml -n app-product exec {product pod name}  -- curl http://localhost
 
 kubectl --kubeconfig ./kubeconfig.yaml create ns app-sale
 kubectl  --kubeconfig ./kubeconfig.yaml apply -f ./sale/sale.yaml
 kubectl --kubeconfig ./kubeconfig.yaml -n app-sale get pod  
-kubectl --kubeconfig ./kubeconfig.yaml -n app-sale exec cust2-sale-64485fcdb6-wkmlt -- curl http://localhost
+kubectl --kubeconfig ./kubeconfig.yaml -n app-sale exec {sales pod name} -- curl http://localhost
 
 ```
-
-<!-- kubectl  --kubeconfig ./kubeconfig.yaml delete -f ./product/product.yaml   
-kubectl  --kubeconfig ./kubeconfig.yaml delete -f ./sale/sale.yaml   -->
-<!-- - ssh on container
-    kubectl exec --stdin --tty {podname} -- /bin/bash
-
-     k --kubeconfig ./kubeconfig.yaml exec --stdin --tty product-7695d46444-pv46n -n app-product -- /bin/bash
-     k --kubeconfig ./kubeconfig.yaml exec --stdin --tty sale-5fd77b9449-btg28 -n app-sales -- /bin/bash
-
-- check api 
-    curl http://localhost/ping
-    curl http://localhost/list
--->
 
 ```
 - Use `vcluster disconnect` to return to your previous kube context
 ```
 
 
-## vcluster create has config options for specific cases:
+## vcluster create has config options for specific cases (optional):
 
     Use --expose to create a vCluster in a remote cluster with an externally accessible LoadBalancer.
 
@@ -120,11 +92,6 @@ vcluster list
 
 ##  Network policy
 
-https://docs.aws.amazon.com/eks/latest/userguide/managing-vpc-cni.html
-https://docs.aws.amazon.com/eks/latest/userguide/cni-network-policy.html
-https://docs.aws.amazon.com/eks/latest/userguide/cni-iam-role.html#cni-iam-role-create-role
-https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html
-https://docs.aws.amazon.com/eks/latest/userguide/managing-add-ons.html#creating-an-add-on
 ```
 cd <path>/aws-eks-loft-vcluster/vcluster/deployment/policy
 ```
@@ -143,6 +110,8 @@ cd <path>/aws-eks-loft-vcluster/vcluster/deployment/policy
 ```
 
 - Test Policy
+
+```
 cd <path>/vcluster/deployment/cluster
 <!-- Get Pod Name and Ip -->
 kubectl --kubeconfig ./kubeconfig.yaml -n app-product get pod  -o wide  <!-- customer1 -->
@@ -150,36 +119,17 @@ kubectl --kubeconfig ./kubeconfig.yaml -n app-sale get pod  -o wide <!-- custome
 kubectl --kubeconfig ./kubeconfig.yaml -n app-product get pod  -o wide <!-- customer2 -->
 kubectl --kubeconfig ./kubeconfig.yaml -n app-sale get pod  -o wide <!-- customer1 -->
 
-kubectl --kubeconfig ./kubeconfig.yaml -n app-product exec cust1-product-7d9dbf94df-7hgv9 -- curl http://192.168.18.144
-kubectl --kubeconfig ./kubeconfig.yaml -n app-product exec cust2-product-7c8999c64-jj7k6  -- curl http://192.168.75.114
-
-
-```
-    kubectl --kubeconfig ./customer1/kubeconfig.yaml -n app-product exec cust1-product-7d9dbf94df-jmv58 -- curl http://192.168.12.229   #cust1-prod-->cust1-sale -- WORKS
-    kubectl --kubeconfig ./customer1/kubeconfig.yaml -n app-product exec cust1-product-7d9dbf94df-5bjl4    -- curl http://192.168.12.206 #cust1-prod-->cust2-prod -- FAILS 
-    kubectl --kubeconfig ./customer2/kubeconfig.yaml -n app-sale exec cust2-sale-64485fcdb6-wkmlt -- curl http://192.168.12.229         #cust2-sale-->cust1-sale -- FAILS
-    kubectl --kubeconfig ./customer2/kubeconfig.yaml -n app-product exec cust2-product-7c8999c64-fx9n4 -- curl http://192.168.0.191       #cust2-prod-->cust2-sale -- WORKS
-
 ```
 
 
-kubectl get pods customer1-cluster-0 -n v-customer1 -o jsonpath='{.items[*].spec["initContainers", "containers"][*].name}'
 
-kubectl get pods customer1-cluster-0 -n v-customer1 -o jsonpath='{.spec.containers[*].name}'
-kubectl get pods -n v-customer1 -o jsonpath='{.items[*].spec.containers[*].name}'
+```
+    kubectl --kubeconfig ./customer1/kubeconfig.yaml -n app-product exec {customer 1 product pod} -- curl http://{customer1 sales pod ip}     #cust1-prod-->cust1-sale -- WORKS
+    kubectl --kubeconfig ./customer1/kubeconfig.yaml -n app-product exec customer 1 product pod}    -- curl http://{customer2 product pod ip} #cust1-prod-->cust2-prod -- FAILS 
+    kubectl --kubeconfig ./customer2/kubeconfig.yaml -n app-sale exec {customer 2 sales pod} -- curl http://{customer 1 sales pod ip}         #cust2-sale-->cust1-sale -- FAILS
+    kubectl --kubeconfig ./customer2/kubeconfig.yaml -n app-product exec {customer 2 product pod} -- curl http://{customer 2 sales pod}       #cust2-prod-->cust2-sale -- WORKS
 
-
-
-kubectl get pod customer1-cluster-0 -n v-customer1  -o jsonpath='{.spec["initContainers", "containers"][*].name}'
-
-kubectl get pods -n v-customer1 -o jsonpath='{range .items[*]}{"\n"}{.metadata.name}{":\t"}{range .spec.containers[*]}{.image}{", "}{end}{end}' |\
-sort
-
-kubectl get pods customer1-cluster-0 -n v-customer1 -o jsonpath='{.spec.containers[*].name}'
-
-kubectl get pods customer1-cluster-0 -n v-customer1 -o=jsonpath='{range .spec.containers[*]}{.name}{"\n"}{end}'
-
-kubectl describe pod customer1-cluster-0 -n v-customer1 | grep -E '^    [a-z]' | awk '{print $1}'
+```
 
 
 ##  vCluster Delete
