@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: helm-guestbook
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    server: https://vcteam-a.vcluster-vcteam-a:443
+  syncPolicy:
+    automated:
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+  source:
+    path: 'team-a-application'
+    repoURL: 'https://github.com/aws-samples/amazon-eks-multitenancy-with-loft-virtualcluster'
+    targetRevision: main
