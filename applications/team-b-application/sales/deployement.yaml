@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cust2-sale
+  name: team-b-sale
   namespace: app-sale
 spec:
   replicas: 1

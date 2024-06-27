@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cust2-product
+  name: team-b-product
   namespace: app-product
 spec:
   replicas: 1

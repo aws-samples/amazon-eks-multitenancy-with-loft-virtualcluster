@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: cust2-sale-service
+  name: team-b-sale-service
   namespace: app-sale
 spec:
   selector:

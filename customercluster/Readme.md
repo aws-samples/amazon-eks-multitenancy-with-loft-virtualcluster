@@ -125,9 +125,9 @@ kubectl --kubeconfig ./kubeconfig.yaml -n app-sale get pod  -o wide <!-- custome
 
 ```
     kubectl --kubeconfig ./customer1/kubeconfig.yaml -n app-product exec {customer 1 product pod} -- curl http://{customer1 sales pod ip}     #team-a-prod-->team-a-sale -- WORKS
-    kubectl --kubeconfig ./customer1/kubeconfig.yaml -n app-product exec customer 1 product pod}    -- curl http://{customer2 product pod ip} #team-a-prod-->cust2-prod -- FAILS 
-    kubectl --kubeconfig ./customer2/kubeconfig.yaml -n app-sale exec {customer 2 sales pod} -- curl http://{customer 1 sales pod ip}         #cust2-sale-->team-a-sale -- FAILS
-    kubectl --kubeconfig ./customer2/kubeconfig.yaml -n app-product exec {customer 2 product pod} -- curl http://{customer 2 sales pod}       #cust2-prod-->cust2-sale -- WORKS
+    kubectl --kubeconfig ./customer1/kubeconfig.yaml -n app-product exec customer 1 product pod}    -- curl http://{customer2 product pod ip} #team-a-prod-->team-b-prod -- FAILS 
+    kubectl --kubeconfig ./customer2/kubeconfig.yaml -n app-sale exec {customer 2 sales pod} -- curl http://{customer 1 sales pod ip}         #team-b-sale-->team-a-sale -- FAILS
+    kubectl --kubeconfig ./customer2/kubeconfig.yaml -n app-product exec {customer 2 product pod} -- curl http://{customer 2 sales pod}       #team-b-prod-->team-b-sale -- WORKS
 
 ```
 

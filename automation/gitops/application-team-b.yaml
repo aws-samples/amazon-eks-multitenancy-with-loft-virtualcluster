@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: team-b-app
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    server: https://vcteam-b.vcluster-vcteam-b:443
+  syncPolicy:
+    automated:
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+  source:
+    path: 'applications/team-b-application'
+    repoURL: 'https://github.com/aws-samples/amazon-eks-multitenancy-with-loft-virtualcluster'
+    targetRevision: main
