@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cert-manager
+  namespace: argocd
+spec:
+  generators:
+    - clusters: {}
+      selector:
+        matchExpressions:
+          - key: server
+            operator: NotIn
+            values:
+              - https://kubernetes.default.svc
+              - https://vcteam-a.vcluster-vcteam-a:443
+  template:
+    metadata:
+      name: '{{name}}-cert-manager' 
+    spec:
+      project: default
+      source:
+        path: ''
+        repoURL: 'https://charts.jetstack.io'
+        targetRevision: v1.15.0
+        chart: cert-manager
+        helm:
+          valuesObject:
+            crds:
+              enabled: true      
+      destination:
+        server: '{{server}}' 
+        namespace: cert-manager 
+      syncPolicy: 
+        automated:
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

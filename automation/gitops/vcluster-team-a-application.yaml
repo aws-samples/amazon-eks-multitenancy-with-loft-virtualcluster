@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vcteam-a
+  namespace: argocd
+spec:
+  project: vcluster
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: vcluster-vcteam-a
+  syncPolicy:
+    automated:
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+  source:
+    path: ''
+    repoURL: 'https://charts.loft.sh'
+    targetRevision: 0.19.6
+    chart: vcluster
+    helm:
+      valuesObject:
+        vcluster:
+          image: rancher/k3s:v1.25.16-k3s3
+        service:
+          type: LoadBalancer
+        isolation:
+          enabled: true
+          podSecurityStandard: baseline
+          resourceQuota:
+            enabled: true
+            quota:
+              requests.cpu: 5
+              requests.memory: 10Gi
+              requests.storage: "20Gi"
+              requests.ephemeral-storage: 100Gi
+              limits.memory: 10Gi
+              limits.ephemeral-storage: 100Gi
+              services.nodeports: 10
+              services.loadbalancers: 1
+              count/endpoints: 10
+              count/pods: 10
+              count/services: 10
+              count/secrets: 60
+              count/configmaps: 60
+              count/persistentvolumeclaims: 10
+          networkPolicy:
+            enabled: true
