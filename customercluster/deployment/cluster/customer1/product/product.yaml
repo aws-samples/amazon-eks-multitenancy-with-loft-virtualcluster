@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cust1-product
+  name: team-a-product
   namespace: app-product
 spec:
   replicas: 1
@@ -33,7 +33,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: cust1-product-service
+  name: team-a-product-service
   namespace: app-product
 spec:
   selector:

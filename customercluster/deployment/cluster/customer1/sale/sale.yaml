@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cust1-sale
+  name: team-a-sale
   namespace: app-sale
 spec:
   replicas: 1
@@ -33,7 +33,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: cust1-sale-service
+  name: team-a-sale-service
   namespace: app-sale
 spec:
   selector:
