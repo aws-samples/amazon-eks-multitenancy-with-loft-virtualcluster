@@ -1,4 +1,22 @@
 apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: team-b
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: team-b project
+  sourceRepos:
+  - https://github.com/aws-samples/amazon-eks-multitenancy-with-loft-virtualcluster
+  destinations:
+  - namespace: '*'
+    server: https://vcteam-b.vcluster-vcteam-b:443
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+---
+apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: team-b-app
@@ -6,7 +24,7 @@ metadata:
   finalizers:
   - resources-finalizer.argocd.argoproj.io
 spec:
-  project: default
+  project: team-b
   destination:
     server: https://vcteam-b.vcluster-vcteam-b:443
   syncPolicy:

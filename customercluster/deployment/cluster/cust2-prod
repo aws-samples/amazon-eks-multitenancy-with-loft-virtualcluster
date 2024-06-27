@@ -1,1 +1,1 @@
-{"api":"product","customer":"customer2","version":"rc0.2","data":[{"name":"Coke","description":null,"price":2.0},{"name":"Pepsi","description":null,"price":2.5},{"name":"7up","description":null,"price":2.45},{"name":"Fanta","description":null,"price":1.5}]}
+{"api":"product","customer":"team-b","version":"rc0.2","data":[{"name":"Coke","description":null,"price":2.0},{"name":"Pepsi","description":null,"price":2.5},{"name":"7up","description":null,"price":2.45},{"name":"Fanta","description":null,"price":1.5}]}

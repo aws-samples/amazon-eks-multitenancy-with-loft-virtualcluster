@@ -15,33 +15,33 @@ vcluster --version
 
 ```
 cd <path>/amazon-eks-multitenancy-with-loft-virtualcluster/vcluster/deployment  
-kubectl create namespace  v-customer1
-kubectl create namespace  v-customer2
+kubectl create namespace  v-team-a
+kubectl create namespace  v-team-b
 
-vcluster create customer1-cluster --namespace v-customer1 --connect=false
-vcluster create customer2-cluster --namespace v-customer2 --distro k0s --connect=false
+vcluster create team-a-cluster --namespace v-team-a --connect=false
+vcluster create team-b-cluster --namespace v-team-b --distro k0s --connect=false
 
 ```
 ## Connect
 vcluster list
 ```
-cd <path>/amazon-eks-multitenancy-with-loft-virtualcluster/customercluster/deployment/cluster/{customer1 OR 2}
+cd <path>/amazon-eks-multitenancy-with-loft-virtualcluster/customercluster/deployment/cluster/{team-a OR 2}
 ```
 <!-- below command will connect to product-cluster and add ./kubeconfig.yaml to folder -->
 ```
 
-    vcluster connect customer1-cluster -n v-customer1 --update-current=false 
+    vcluster connect team-a-cluster -n v-team-a --update-current=false 
 
-    vcluster connect customer2-cluster -n v-customer2 --update-current=false 
+    vcluster connect team-b-cluster -n v-team-b --update-current=false 
 
 
     kubectl  --kubeconfig ./kubeconfig.yaml get namespaces
-    kubectl replace --raw "/api/v1/namespaces/v-customer2/finalize" -f ./tmp.json
+    kubectl replace --raw "/api/v1/namespaces/v-team-b/finalize" -f ./tmp.json
 
 ```
 
 ```
-cd <path>/vcluster/deployment/cluster/customer1
+cd <path>/vcluster/deployment/cluster/team-a
 
 ```
 ## Deploy app
@@ -101,12 +101,12 @@ cd <path>/aws-eks-loft-vcluster/vcluster/deployment/policy
 - Apply Policy
 
 ```
-    kubectl  apply -f ./customercluster/deployment/policy/customer1-deny-all-external.yaml  
-    kubectl  apply -f ./customercluster/deployment/policy/customer2-deny-all-external.yaml  
+    kubectl  apply -f ./customercluster/deployment/policy/team-a-deny-all-external.yaml  
+    kubectl  apply -f ./customercluster/deployment/policy/team-b-deny-all-external.yaml  
 
 
-    kubectl  delete -f ./customercluster/deployment/policy/customer1-deny-all-external.yaml  
-    kubectl  delete -f ./customercluster/deployment/policy/customer2-deny-all-external.yaml  
+    kubectl  delete -f ./customercluster/deployment/policy/team-a-deny-all-external.yaml  
+    kubectl  delete -f ./customercluster/deployment/policy/team-b-deny-all-external.yaml  
 ```
 
 - Test Policy
@@ -114,20 +114,20 @@ cd <path>/aws-eks-loft-vcluster/vcluster/deployment/policy
 ```
 cd <path>/vcluster/deployment/cluster
 <!-- Get Pod Name and Ip -->
-kubectl --kubeconfig ./kubeconfig.yaml -n app-product get pod  -o wide  <!-- customer1 -->
-kubectl --kubeconfig ./kubeconfig.yaml -n app-sale get pod  -o wide <!-- customer1 -->
-kubectl --kubeconfig ./kubeconfig.yaml -n app-product get pod  -o wide <!-- customer2 -->
-kubectl --kubeconfig ./kubeconfig.yaml -n app-sale get pod  -o wide <!-- customer1 -->
+kubectl --kubeconfig ./kubeconfig.yaml -n app-product get pod  -o wide  <!-- team-a -->
+kubectl --kubeconfig ./kubeconfig.yaml -n app-sale get pod  -o wide <!-- team-a -->
+kubectl --kubeconfig ./kubeconfig.yaml -n app-product get pod  -o wide <!-- team-b -->
+kubectl --kubeconfig ./kubeconfig.yaml -n app-sale get pod  -o wide <!-- team-a -->
 
 ```
 
 
 
 ```
-    kubectl --kubeconfig ./customer1/kubeconfig.yaml -n app-product exec {customer 1 product pod} -- curl http://{customer1 sales pod ip}     #team-a-prod-->team-a-sale -- WORKS
-    kubectl --kubeconfig ./customer1/kubeconfig.yaml -n app-product exec customer 1 product pod}    -- curl http://{customer2 product pod ip} #team-a-prod-->team-b-prod -- FAILS 
-    kubectl --kubeconfig ./customer2/kubeconfig.yaml -n app-sale exec {customer 2 sales pod} -- curl http://{customer 1 sales pod ip}         #team-b-sale-->team-a-sale -- FAILS
-    kubectl --kubeconfig ./customer2/kubeconfig.yaml -n app-product exec {customer 2 product pod} -- curl http://{customer 2 sales pod}       #team-b-prod-->team-b-sale -- WORKS
+    kubectl --kubeconfig ./team-a/kubeconfig.yaml -n app-product exec {customer 1 product pod} -- curl http://{team-a sales pod ip}     #team-a-prod-->team-a-sale -- WORKS
+    kubectl --kubeconfig ./team-a/kubeconfig.yaml -n app-product exec customer 1 product pod}    -- curl http://{team-b product pod ip} #team-a-prod-->team-b-prod -- FAILS 
+    kubectl --kubeconfig ./team-b/kubeconfig.yaml -n app-sale exec {customer 2 sales pod} -- curl http://{customer 1 sales pod ip}         #team-b-sale-->team-a-sale -- FAILS
+    kubectl --kubeconfig ./team-b/kubeconfig.yaml -n app-product exec {customer 2 product pod} -- curl http://{customer 2 sales pod}       #team-b-prod-->team-b-sale -- WORKS
 
 ```
 
@@ -135,8 +135,8 @@ kubectl --kubeconfig ./kubeconfig.yaml -n app-sale get pod  -o wide <!-- custome
 ##  vCluster Delete
 
 ```
-vcluster delete customer1-cluster -n v-customer1   --delete-namespace
-vcluster delete customer2-cluster -n v-customer2   --delete-namespace
+vcluster delete team-a-cluster -n v-team-a   --delete-namespace
+vcluster delete team-b-cluster -n v-team-b   --delete-namespace
 
 k config get-contexts
 k config set-context akaasif-Isengard@vcluster-demo.ap-southeast-2.eksctl.io 
@@ -148,9 +148,9 @@ kubectl config use-context akaasif-Isengard@vcluster-demo-2.us-east-2.eksctl.io
 
 ```    
      kubectl  --kubeconfig ./kubeconfig.yaml get namespaces
-     kubectl get namespace v-customer1 -o json > tmp1.json
-     kubectl get namespace v-customer2 -o json > tmp2.json
+     kubectl get namespace v-team-a -o json > tmp1.json
+     kubectl get namespace v-team-b -o json > tmp2.json
 
-     kubectl replace --raw "/api/v1/namespaces/v-customer1/finalize" -f ./tmp1.json
-     kubectl replace --raw "/api/v1/namespaces/v-customer2/finalize" -f ./tmp2.json
+     kubectl replace --raw "/api/v1/namespaces/v-team-a/finalize" -f ./tmp1.json
+     kubectl replace --raw "/api/v1/namespaces/v-team-b/finalize" -f ./tmp2.json
 ```

@@ -26,7 +26,7 @@ spec:
             memory: 1Gi
         env:
           - name: current_env
-            value: customer1
+            value: team-a
           - name: current_ver
             value: rc0.2
 ---
