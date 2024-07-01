@@ -3,7 +3,7 @@
 # Deploy VPC CNI addon
 #*************************
 
-source ./hostcluster/environmentVariables.sh
+# source ./hostcluster/environmentVariables.sh
 
 echo "${GREEN}=========================="
 echo "${GREEN}Installing VPC CNI N/W Policy"
