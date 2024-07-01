@@ -10,7 +10,8 @@ echo "${GREEN}Installing VPC CNI N/W Policy"
 echo "${GREEN}=========================="
 
 if [ -z $CLUSTER_NAME ] || [ -z $AWS_REGION ] || [ -z $ACCOUNT_ID ] ;then
-  echo "${RED}Update values & Run environmentVariables.sh file"
+  # echo "${RED}Update values & Run environmentVariables.sh file"
+  echo "Set environment variable before installing CNI"
   exit 1;
 else 
 
