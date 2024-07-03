@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: product
-        image: khanasif1/product_api:rc0.2
+        image: public.ecr.aws/g3q5i8l0/product_api:latest
         imagePullPolicy: Always
         resources:
           requests:
