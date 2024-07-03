@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: sale
-        image: khanasif1/sale_api:rc0.2
+        image: public.ecr.aws/g3q5i8l0/sale_api:latest
         imagePullPolicy: Always
         resources:
           requests:
