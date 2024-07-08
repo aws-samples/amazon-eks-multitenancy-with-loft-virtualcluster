@@ -8,10 +8,10 @@ spec:
     - clusters:
         selector:
           matchExpressions:
-            - key: generate.kyverno.io/trigger-namespace
+            - key: environment
               operator: In
               values:
-                - vcluster-vcteam-b
+                - vcteam-b
   template:
     metadata:
       name: '{{name}}-cert-manager' 
