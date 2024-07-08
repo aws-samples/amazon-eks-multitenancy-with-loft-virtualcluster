@@ -5,13 +5,13 @@ metadata:
   namespace: argocd
 spec:
   generators:
-    - clusters: {}
-      selector:
-        matchExpressions:
-          - key: generate.kyverno.io/trigger-namespace
-            operator: In
-            values:
-              - vcluster-vcteam-b
+    - clusters:
+        selector:
+          matchExpressions:
+            - key: generate.kyverno.io/trigger-namespace
+              operator: In
+              values:
+                - vcluster-vcteam-b
   template:
     metadata:
       name: '{{name}}-cert-manager' 
