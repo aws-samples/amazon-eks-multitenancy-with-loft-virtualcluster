@@ -8,11 +8,10 @@ spec:
     - clusters: {}
       selector:
         matchExpressions:
-          - key: server
-            operator: NotIn
+          - key: generate.kyverno.io/trigger-namespace
+            operator: In
             values:
-              - https://kubernetes.default.svc
-              - https://vcteam-a.vcluster-vcteam-a:443
+              - vcluster-vcteam-b
   template:
     metadata:
       name: '{{name}}-cert-manager' 
