@@ -5,14 +5,13 @@ metadata:
   namespace: argocd
 spec:
   generators:
-    - clusters: {}
-      selector:
-        matchExpressions:
-          - key: server
-            operator: NotIn
-            values:
-              - https://kubernetes.default.svc
-              - https://vcteam-a.vcluster-vcteam-a:443
+    - clusters:
+        selector:
+          matchExpressions:
+            - key: environment
+              operator: In
+              values:
+                - vcteam-b
   template:
     metadata:
       name: '{{name}}-cert-manager' 

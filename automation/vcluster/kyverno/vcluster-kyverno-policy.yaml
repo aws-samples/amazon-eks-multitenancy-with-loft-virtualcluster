@@ -51,7 +51,8 @@ spec:
         kind: Secret
         metadata:
           labels:
-            argocd.argoproj.io/secret-type: cluster 
+            argocd.argoproj.io/secret-type: cluster
+            environment: "{{ vclusterName }}"
         stringData: 
           name: "{{ vclusterName }}"
           server: "https://{{ vclusterName }}.{{ namespace }}:443"
