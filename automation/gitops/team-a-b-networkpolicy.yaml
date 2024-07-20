@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: network-policies-applicationset
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: team-a-b-deny-all-external
+            path: automation/gitops/network-policies
+  template:
+    metadata:
+      name: '{{name}}'
+    spec:
+      project: default
+      source:
+        repoURL: 'https://github.com/aws-samples/amazon-eks-multitenancy-with-loft-virtualcluster'
+        targetRevision: HEAD
+        path: '{{path}}'
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: argocd
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
