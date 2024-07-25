@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: all-applications
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: 'https://github.com/aws-samples/amazon-eks-multitenancy-with-loft-virtualcluster'
+        revision: main
+        files:
+          - path: 'automation/gitops/applications/'
+  template:
+    metadata:
+      name: 'all-apps-team-a-b'
+    spec:
+      project: default
+      source:
+        repoURL: 'https://github.com/aws-samples/amazon-eks-multitenancy-with-loft-virtualcluster'
+        targetRevision: main
+        path: '{{path}}'
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: argocd
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
