@@ -21,7 +21,7 @@ spec:
     helm:
       valuesObject:
         vcluster:
-          image: rancher/k3s:v1.25.16-k3s3
+          image: rancher/k3s:v1.30.10-k3s1
         service:
           type: LoadBalancer
         isolation:
