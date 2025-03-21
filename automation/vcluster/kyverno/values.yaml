@@ -1,0 +1,33 @@
+admissionController:
+  clusterRole:
+    extraResources:
+      - apiGroups:
+          - '*'
+        resources:
+          - '*'
+        verbs:
+          - get
+          - list
+          - watch
+backgroundController:
+  clusterRole:
+    extraResources:
+      - apiGroups:
+          - '*'
+        resources:
+          - '*'
+        verbs:
+          - get
+          - list
+          - watch
+reportsController:
+  clusterRole:
+    extraResources:
+      - apiGroups:
+          - '*'
+        resources:
+          - '*'
+        verbs:
+          - get
+          - list
+          - watch
