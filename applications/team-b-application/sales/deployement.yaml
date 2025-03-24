@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: sale
-        image: public.ecr.aws/g3q5i8l0/sale_api:latest
+        image: public.ecr.aws/o8u4n7d7/vlcuster-blog/sale_api:latest
         imagePullPolicy: Always
         resources:
           requests:
