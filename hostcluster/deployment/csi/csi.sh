@@ -1,44 +1,60 @@
 #!/bin/bash
-#*************************
-# Deploy CSI
-#*************************
+
+# echo colour
+RED=$(tput setaf 1)
+GREEN=$(tput setaf 2)
+YELLOW=$(tput setaf 3)
+CYAN=$(tput setaf 6)
+BLUE=$(tput setaf 4)
+NC=$(tput sgr0)
+
 echo "${GREEN}=========================="
 echo "${GREEN}Installing EBS CSI Driver"
 echo "${GREEN}=========================="
-source ./hostcluster/environmentVariables.sh
 
-if [ -z $CLUSTER_NAME ] || [ -z $AWS_REGION ] || [ -z $ACCOUNT_ID ] ;then
-    echo "${RED}Update values & Run environmentVariables.sh file"
-    exit 1;
+if [ -z $CLUSTER_NAME ] || [ -z $AWS_REGION ] || [ -z $ACCOUNT_ID ]; then
+  echo "${RED}Set environment variables CLUSTER_NAME, AWS_REGION, and ACCOUNT_ID before installing EBS CSI Driver"
+  exit 1
 else 
-    echo "${GREEN}**Start CSI provisioning**"
+  
+  
+# Create trust policy for EBS CSI Driver Role
+  cat << EOF > trust-policy.json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "pods.eks.amazonaws.com"
+            },
+            "Action": [
+                "sts:AssumeRole",
+                "sts:TagSession"
+            ]
+        }
+    ]
+}
+EOF
 
-    echo "${GREEN}Create IAM policy"
-    csi_policy=$(aws iam create-policy \
-        --policy-name Amazon_EBS_CSI_Driver_$CLUSTER_NAME \
-        --policy-document file://hostcluster/deployment/csi/policy.json \
-        --output text --query Policy.Arn)
-    echo $csi_policy
+  echo "${YELLOW}Creating IAM role for EBS CSI Driver"
+  aws iam create-role --role-name AmazonEKS_EBS_CSI_DriverRole --assume-role-policy-document file://trust-policy.json
 
-    echo "${GREEN}Get Worker node IAM Role ARN"
+  echo "${YELLOW}Attaching EBS CSI Driver policy to the role"
+  aws iam attach-role-policy --role-name AmazonEKS_EBS_CSI_DriverRole --policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy
 
-    worker_node_role=$(kubectl describe configmap aws-auth -n kube-system | grep "rolearn:" | awk -F'/' '{print $NF}')
-    echo $worker_node_role
-    aws iam attach-role-policy \
-        --policy-arn ${csi_policy} \
-        --role-name ${worker_node_role}
 
-    echo "${GREEN}CSI policy attached to worker node role"
+  echo "${YELLOW}Creating service account for EBS CSI Driver"
+  kubectl create sa ebs-csi-controller-sa -n kube-system
 
-    echo "${GREEN}Deploy EBS CSI Driver"
-    kubectl apply -k "github.com/kubernetes-sigs/aws-ebs-csi-driver/deploy/kubernetes/overlays/stable/?ref=master"
-    # kubectl delete -k "github.com/kubernetes-sigs/aws-ebs-csi-driver/deploy/kubernetes/overlays/stable/?ref=master"
-    echo "${GREEN}Verify ebs-csi pods running"
-    kubectl get pods -n kube-system
+  echo "${YELLOW}Installing EBS CSI Driver addon"
+  aws eks create-addon --cluster-name $CLUSTER_NAME --addon-name aws-ebs-csi-driver \
+    --pod-identity-associations serviceAccount=ebs-csi-controller-sa,roleArn=arn:aws:iam::${ACCOUNT_ID}:role/AmazonEKS_EBS_CSI_DriverRole
+
+  # Clean up
+  rm trust-policy.json
+
+  echo "${GREEN}=========================="
+  echo "${GREEN}EBS CSI Driver installation completed"
+  echo "${GREEN}=========================="
 fi
-
-echo "${GREEN}==========================" 
-echo "${GREEN}CSI installation completed"
-echo "${GREEN}=========================="
-
-# kubectl get csidriver ebs.csi.aws.com
